@@ -10,13 +10,19 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import android.Manifest
+import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import java.util.Locale
+
 
 class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var locationManager : LocationManager
     private lateinit var tvOutput : TextView
+    private  lateinit var tvAddress: TextView
     private val locationPermissionCode  = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,9 +30,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
         setContentView(R.layout.activity_main)
 
         val button : Button = findViewById(R.id.btnLocation)
+
         button.setOnClickListener(){
             getLocation()
         }
+
     }
 
     private fun getLocation() {
@@ -36,11 +44,22 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
+
+
     }
 
     override fun onLocationChanged(location: Location) {
         tvOutput = findViewById(R.id.lblOutput)
+        tvAddress = findViewById(R.id.txtAddress)
         tvOutput.text = "Latitude: " + location.latitude + ", Longitude: " + location.longitude
+
+        val geocoder = Geocoder(this , Locale.getDefault())
+        val addresses = geocoder.getFromLocation(location.latitude , location.longitude, 1)
+
+        tvAddress.text = addresses?.get(0)?.getAddressLine(0)
+
+        Log.d(TAG, addresses?.get(0)?.getAddressLine(0).toString())
+
     }
 
     override fun onRequestPermissionsResult(
@@ -58,6 +77,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
         }
     }
+
+
+
+
 }
 
 //show address of co-ords
